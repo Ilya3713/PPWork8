@@ -30,13 +30,12 @@ def create_db():  # создает таблицы
     student_id INTEGER REFERENCES Student(id),
     course_id INTEGER REFERENCES Course(id));
     """)
-    # cur.execute("select * from Student")
-    # print(cur.fetchall())
+    conn.commit()
 
 
 def get_students(course_id):  # возвращает студентов определенного курса
     cur.execute(f'select student_id from Student_Course where course_id={course_id}')
-
+    return cur.fetchall()
 
 def add_students(course_id, students):  # создает студентов и записывает их на курс
     cur.execute('insert into Student (name, gpa, birth) values (%s, %s, %s)', (s1['name'], s1['gpa'],
@@ -46,16 +45,21 @@ def add_students(course_id, students):  # создает студентов и �
     conn.commit()
 
 
-def add_student(student):  # просто создает студента
-    cur.execute('insert into Student (name, gpa, birth) values (%s, %s, %s)', (student['name'], student['gpa'],
-                                                                               student['birth']))
-    cur.execute("select * from Student")
-    # print(cur.fetchall())
+def add_student(student):
+    # просто создает студента
+    cur.execute(""" INSERT INTO student (name, gpa, birth)
+        VALUES (%s, %s, %s);
+        """, (student["name"], student["gpa"], student["birth"], ))
+    cur.execute("""SELECT * FROM student ORDER BY id DESC LIMIT 1;""")
+    conn.commit()
+    last_added_student = cur.fetchone()
+    # возвращает id только что созданного студента
+    return last_added_student[0]
 
 
 def get_student(student_id):
     cur.execute(f'select name from Student where student_id={student_id}')
-    # print(cur.fetchall())
+    return cur.fetchall()
 
 
 create_db()
